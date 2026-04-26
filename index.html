@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>YT Roblox Hub</title>
+  <style>
+    body {
+      background: #0f0f0f;
+      color: white;
+      font-family: Arial;
+      text-align: center;
+    }
+
+    input, textarea {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: none;
+      width: 250px;
+    }
+
+    button {
+      padding: 10px;
+      margin: 5px;
+      background: red;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .script-box {
+      background: #1a1a1a;
+      padding: 10px;
+      margin: 10px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>YT Roblox Hub</h1>
+
+<h2>🔎 Avatar Viewer</h2>
+<input id="userid" placeholder="User ID">
+<button onclick="getAvatar()">Get Avatar</button>
+<div id="avatar"></div>
+
+<hr>
+
+<h2>📜 Script Library</h2>
+
+<input id="title" placeholder="Script title"><br>
+<textarea id="code" placeholder="Paste your SAFE script"></textarea><br>
+<button onclick="addScript()">Add Script</button>
+
+<div id="scripts"></div>
+
+<script>
+async function getAvatar() {
+  const id = document.getElementById("userid").value;
+  const res = await fetch(`/avatar/${id}`);
+  const data = await res.json();
+
+  document.getElementById("avatar").innerHTML =
+    `<img src="${data.url}" width="150">`;
+}
+
+async function loadScripts() {
+  const res = await fetch("/scripts");
+  const data = await res.json();
+
+  const container = document.getElementById("scripts");
+  container.innerHTML = "";
+
+  data.forEach(s => {
+    container.innerHTML += `
+      <div class="script-box">
+        <h3>${s.title}</h3>
+        <pre>${s.code}</pre>
+        <button onclick="copyText(\`${s.code}\`)">Copy</button>
+      </div>
+    `;
+  });
+}
+
+async function addScript() {
+  const title = document.getElementById("title").value;
+  const code = document.getElementById("code").value;
+
+  await fetch("/add-script", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title, code })
+  });
+
+  loadScripts();
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text);
+  alert("Copied!");
+}
+
+loadScripts();
+</script>
+
+</body>
+</html>
